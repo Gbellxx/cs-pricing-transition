@@ -430,3 +430,250 @@
                     <span style="font-weight: 700; color: #00C5CB; font-size: 1.2rem;" id="summaryTotal">$58,500</span>
                 </div>
                 <div class="summary-row" style="font-size: 0.9rem; color: #666;">
+                    <span>Less: Credits Applied</span>
+                    <span style="font-weight: 600;" id="summaryCreditsApplied">-$58,500</span>
+                </div>
+            </div>
+
+            <div id="paymentStatus" class="total-box total-covered">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">✅ Payment Status</div>
+                <div style="font-size: 2.5rem; font-weight: bold; color: #00C5CB;" id="topupAmount">$0</div>
+                <div id="topupMessage" style="font-size: 0.9rem; color: #00C5CB; margin-top: 5px; font-weight: 600;">
+                    Credits fully cover all services!
+                </div>
+            </div>
+
+            <div class="platform-value-final">
+                <div style="font-size: 1rem; margin-bottom: 10px; opacity: 0.9;">🎁 Platform Access Value</div>
+                <div style="font-size: 2.8rem; font-weight: bold; margin-bottom: 10px;" id="finalPlatformValue">$14,000</div>
+                <div style="font-size: 1rem; opacity: 0.85; margin-bottom: 15px;" id="finalPlatformText">FREE for 7 months (1 brand)</div>
+                <div id="yearBreakdown" class="hidden" style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 6px; font-size: 0.9rem;">
+                    Year 1: <span id="year1Value">$14,000</span> • Year 2: <span id="year2Value">$24,000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pricing = {
+            0: 0,
+            30: 12000,
+            60: 19500,
+            120: 37500,
+            250: 72000,
+            500: 144000,
+            1000: 285000
+        };
+
+        const startDate = new Date('2025-10-01');
+
+        function fmt(n) {
+            return '$' + n.toLocaleString('en-US');
+        }
+
+        function getMonthsDifference(date1, date2) {
+            const years = date2.getFullYear() - date1.getFullYear();
+            const months = date2.getMonth() - date1.getMonth();
+            return years * 12 + months;
+        }
+
+        function calculate() {
+            const expiryDate = new Date(document.getElementById('expiryDate').value);
+            const committed = document.getElementById('committed').checked;
+            const currentPlan = parseInt(document.getElementById('currentPlan').value);
+            const newCredits = parseInt(document.getElementById('newCredits').value);
+            const brands = parseInt(document.getElementById('brands').value);
+            const managedService = document.getElementById('managedService').checked;
+            const adSpend = parseInt(document.getElementById('adSpend').value);
+
+            const monthsToExpiry = getMonthsDifference(startDate, expiryDate);
+            const totalFreeMonths = committed ? monthsToExpiry + 12 : monthsToExpiry;
+            const quartersRemaining = Math.ceil(monthsToExpiry / 3);
+            const creditsAvailable = currentPlan * quartersRemaining;
+
+            const finalExpiryDate = new Date(expiryDate);
+            if (committed) {
+                finalExpiryDate.setMonth(finalExpiryDate.getMonth() + 12);
+            }
+
+            // Platform card
+            const platformCard = document.getElementById('platformCard');
+            platformCard.className = committed ? 'platform-card committed' : 'platform-card baseline';
+            document.getElementById('platformTitle').textContent = committed ? '✅ Extended Platform Access' : '📅 Baseline Platform Access';
+            document.getElementById('freeMonths').textContent = totalFreeMonths;
+            document.getElementById('dateRange').textContent = `From October 2025 through ${finalExpiryDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+
+            const bonusBadge = document.getElementById('bonusBadge');
+            if (committed) {
+                bonusBadge.classList.remove('hidden');
+                document.getElementById('bonusText').textContent = `${monthsToExpiry} months baseline + 12 month extension`;
+            } else {
+                bonusBadge.classList.add('hidden');
+            }
+
+            // Platform fee value
+            const platformFeePerBrand = 24000;
+            const totalAnnualPlatformFee = platformFeePerBrand * brands;
+            const firstPeriodValue = Math.round((totalAnnualPlatformFee / 12) * monthsToExpiry);
+            const secondPeriodValue = committed ? totalAnnualPlatformFee : 0;
+            const totalPlatformValue = firstPeriodValue + secondPeriodValue;
+
+            document.getElementById('platformFeeLabel').textContent = `Platform Fee Value (${brands} ${brands === 1 ? 'brand' : 'brands'})`;
+            document.getElementById('platformValue').textContent = fmt(totalPlatformValue);
+            
+            if (committed) {
+                document.getElementById('platformCalc').textContent = `Year 1: ${fmt(firstPeriodValue)} (${monthsToExpiry} months) • Year 2: ${fmt(secondPeriodValue)} (12 months)`;
+            } else {
+                document.getElementById('platformCalc').textContent = `$${brands === 1 ? '24K/brand' : `24K × ${brands} brands`}/year × ${monthsToExpiry} months`;
+            }
+
+            // Credits
+            document.getElementById('creditsAmount').textContent = fmt(creditsAvailable);
+            document.getElementById('creditsUntil').textContent = `From now until ${expiryDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+            document.getElementById('creditsCalc').textContent = `${fmt(currentPlan * 4)} annual plan × ${quartersRemaining} quarters = ${fmt(creditsAvailable)}`;
+
+            // Pricing section
+            document.getElementById('quarterInfo').textContent = `📊 Showing quarterly breakdown from now until ${expiryDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} (${quartersRemaining} quarters)`;
+            document.getElementById('annualPlatformFee').textContent = fmt(24000 * brands);
+            document.getElementById('platformFeeCalc').textContent = brands === 1 ? '$24K/brand' : `$24K × ${brands} brands`;
+            document.getElementById('freeBadge').textContent = `FREE for ${totalFreeMonths} months`;
+            document.getElementById('creditsDisplay').textContent = newCredits;
+            document.getElementById('contentPrice').textContent = fmt(pricing[newCredits]) + '/quarter';
+
+            // Managed service
+            const managedSection = document.getElementById('managedServiceSection');
+            let managedCost = 0;
+            if (managedService) {
+                managedSection.classList.remove('hidden');
+                const monthlyFee = Math.max(5000, adSpend * 0.10);
+                managedCost = monthlyFee * 3;
+                document.getElementById('managedPrice').textContent = fmt(managedCost) + '/quarter';
+                document.getElementById('managedCalc').textContent = `10% of ${fmt(adSpend)}/month ad spend = ${fmt(monthlyFee)}/month${adSpend * 0.10 < 5000 ? ' (minimum applied)' : ''}`;
+                document.getElementById('totalPerQuarter').textContent = fmt(pricing[newCredits] + managedCost);
+            } else {
+                managedSection.classList.add('hidden');
+            }
+
+            // Quarter breakdown
+            const quarterCost = pricing[newCredits] + managedCost;
+            let remainingCredits = creditsAvailable;
+            let breakdownHTML = '';
+            let totalTopUp = 0;
+
+            for (let q = 1; q <= quartersRemaining; q++) {
+                const needed = quarterCost;
+                const topUp = Math.max(0, needed - remainingCredits);
+                const covered = Math.min(remainingCredits, needed);
+                totalTopUp += topUp;
+
+                const isTopUp = topUp > 0;
+                breakdownHTML += `
+                    <div class="quarter-box ${isTopUp ? 'quarter-topup' : 'quarter-covered'}">
+                        <div class="quarter-header">
+                            <span style="font-weight: 600; color: ${isTopUp ? '#856404' : '#00C5CB'}">
+                                ${isTopUp ? '💰' : '✅'} Quarter ${q}
+                            </span>
+                            <span style="font-size: 0.85rem; color: #666;">Cost: ${fmt(needed)}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666;">
+                            Credits applied: ${fmt(covered)}
+                            ${isTopUp ? `<span style="color: #856404; font-weight: 600; margin-left: 10px;">+ Top-up: ${fmt(topUp)}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                remainingCredits = Math.max(0, remainingCredits - needed);
+            }
+
+            breakdownHTML += `
+                <div style="background: ${totalTopUp > 0 ? '#FFC107' : '#00C5CB'}; color: white; padding: 15px; border-radius: 6px; margin-top: 15px; text-align: center;">
+                    <div style="font-size: 0.9rem; margin-bottom: 5px; opacity: 0.9;">
+                        ${totalTopUp > 0 ? 'Total Additional Payment Required' : 'Fully Covered'}
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: bold;">${fmt(totalTopUp)}</div>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.85;">
+                        ${totalTopUp === 0 
+                            ? `Credits cover all ${quartersRemaining} quarters until expiry`
+                            : `For remaining ${quartersRemaining} quarters until ${expiryDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
+                        }
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('quarterBreakdown').innerHTML = breakdownHTML;
+
+            // Summary section
+            const totalNewCost = quarterCost * quartersRemaining;
+            const contentTotal = pricing[newCredits] * quartersRemaining;
+            const managedTotal = managedCost * quartersRemaining;
+
+            document.getElementById('summaryAnnual').textContent = fmt(currentPlan * 4);
+            document.getElementById('summaryTerm').textContent = `${monthsToExpiry} months (${quartersRemaining} quarters)`;
+            document.getElementById('summaryCredits').textContent = fmt(creditsAvailable);
+            document.getElementById('summaryCreditsNum').textContent = newCredits;
+            document.getElementById('summaryContent').textContent = fmt(contentTotal);
+
+            const summaryManagedRow = document.getElementById('summaryManagedRow');
+            if (managedService) {
+                summaryManagedRow.classList.remove('hidden');
+                document.getElementById('summaryManagedQuarters').textContent = quartersRemaining;
+                document.getElementById('summaryManaged').textContent = fmt(managedTotal);
+            } else {
+                summaryManagedRow.classList.add('hidden');
+            }
+
+            document.getElementById('summaryTotal').textContent = fmt(totalNewCost);
+            document.getElementById('summaryCreditsApplied').textContent = '-' + fmt(Math.min(creditsAvailable, totalNewCost));
+
+            const paymentStatus = document.getElementById('paymentStatus');
+            if (totalTopUp > 0) {
+                paymentStatus.className = 'total-box total-topup';
+                document.getElementById('topupAmount').style.color = '#856404';
+                document.getElementById('topupAmount').textContent = fmt(totalTopUp);
+                document.getElementById('topupMessage').style.color = '#856404';
+                document.getElementById('topupMessage').textContent = '';
+                document.querySelector('#paymentStatus > div:first-child').textContent = '💰 Additional Payment Required';
+            } else {
+                paymentStatus.className = 'total-box total-covered';
+                document.getElementById('topupAmount').style.color = '#00C5CB';
+                document.getElementById('topupAmount').textContent = fmt(0);
+                document.getElementById('topupMessage').style.color = '#00C5CB';
+                document.getElementById('topupMessage').textContent = 'Credits fully cover all services!';
+                document.querySelector('#paymentStatus > div:first-child').textContent = '✅ Payment Status';
+            }
+
+            document.getElementById('finalPlatformValue').textContent = fmt(totalPlatformValue);
+            document.getElementById('finalPlatformText').textContent = `FREE for ${totalFreeMonths} months (${brands} ${brands === 1 ? 'brand' : 'brands'})`;
+
+            const yearBreakdown = document.getElementById('yearBreakdown');
+            if (committed) {
+                yearBreakdown.classList.remove('hidden');
+                document.getElementById('year1Value').textContent = fmt(firstPeriodValue);
+                document.getElementById('year2Value').textContent = fmt(secondPeriodValue);
+            } else {
+                yearBreakdown.classList.add('hidden');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('expiryDate').addEventListener('change', calculate);
+        document.getElementById('committed').addEventListener('change', calculate);
+        document.getElementById('currentPlan').addEventListener('change', calculate);
+        document.getElementById('newCredits').addEventListener('change', calculate);
+        document.getElementById('brands').addEventListener('input', calculate);
+        document.getElementById('managedService').addEventListener('change', function() {
+            const adSpendGroup = document.getElementById('adSpendGroup');
+            if (this.checked) {
+                adSpendGroup.classList.remove('hidden');
+            } else {
+                adSpendGroup.classList.add('hidden');
+            }
+            calculate();
+        });
+        document.getElementById('adSpend').addEventListener('input', calculate);
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
