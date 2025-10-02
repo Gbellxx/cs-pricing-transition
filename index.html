@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Pricing Transition Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ECFBFA;
+            padding: 30px 15px;
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00C5CB;
+            font-size: 2.2rem;
+            margin-bottom: 35px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 197, 203, 0.1);
+        }
+
+        .card h2 {
+            color: #00C5CB;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #C5F1F1;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #C5F1F1;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #00C5CB;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #00C5CB;
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+
+        small {
+            color: #666;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .contact-sales {
+            background: #00C5CB;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .contact-sales h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .contact-sales p {
+            margin-bottom: 15px;
+        }
+
+        .contact-sales a {
+            color: white;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .result-card {
+            background: #C5F1F1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .result-card h3 {
+            color: #00C5CB;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 197, 203, 0.3);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-row.total {
+            border-top: 2px solid #00C5CB;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+
+        .result-label {
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: #00C5CB;
+            font-size: 1.1rem;
+        }
+
+        .calculation-box {
+            padding: 25px;
+            border-radius: 8px;
+            border: 3px solid #00C5CB;
+            margin-bottom: 20px;
+        }
+
+        .calculation-box.needs-payment {
+            background: #FFF9E6;
+        }
+
+        .calculation-box.covered {
+            background: #E8F8F8;
+        }
+
+        .calculation-box h3 {
+            color: #00C5CB;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .calculation-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calc-item {
+            text-align: center;
+        }
+
+        .calc-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .calc-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00C5CB;
+        }
+
+        .calc-operator {
+            font-size: 2rem;
+            color: #00C5CB;
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .result-box .label {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .result-box .big-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .result-box .big-number.positive {
+            color: #e74c3c;
+        }
+
+        .result-box .big-number.negative {
+            color: #00C5CB;
+        }
+
+        .result-box .note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .benefit-box {
+            background: #00C5CB;
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .benefit-box h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .benefit-box .value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 15px 0 10px;
+        }
+
+        .benefit-box .note {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+
+        .summary-box {
+            background: #ECFBFA;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #C5F1F1;
+        }
+
+        .summary-box h4 {
+            color: #00C5CB;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        .summary-box ul {
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .calculation-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .calc-operator {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pricing Transition Calculator</h1>
+
+        <div class="input-grid">
+            <div class="card">
+                <h2>Platform Tokens</h2>
+                <div class="input-group">
+                    <label for="tokens">Tokens Available (Prepaid $)</label>
+                    <input type="number" id="tokens" value="96000">
+                    <small>Your old subscription converted to tokens</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>New Model Selection</h2>
+                <div class="input-group">
+                    <label for="credits">Content Credit Capacity</label>
+                    <select id="credits">
+                        <option value="0">0 credits (Platform only)</option>
+                        <option value="30">30 credits</option>
+                        <option value="60" selected>60 credits</option>
+                        <option value="120">120 credits</option>
+                        <option value="250">250 credits</option>
+                        <option value="500">500 credits</option>
+                        <option value="1000">1,000 credits</option>
+                        <option value="contact">Other (Contact Sales)</option>
+                    </select>
+                    <small>Upgrade anytime, downgrade quarterly</small>
+                </div>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="managed">
+                    <span style="font-weight: 600;">Add Managed Services</span>
+                </label>
+
+                <div class="input-group" id="adSpendGroup" style="display: none;">
+                    <label for="adSpend">Monthly Ad Spend</label>
+                    <input type="number" id="adSpend" value="50000">
+                </div>
+
+                <div class="input-group" id="percentGroup" style="display: none;">
+                    <label for="percent">Service Rate (%)</label>
+                    <input type="number" id="percent" value="15" min="10" max="30">
+                    <small>10-30%, $5K minimum</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="brands">Brand Profiles (Optional)</label>
+                    <input type="number" id="brands" value="0">
+                    <small>For free platform value calculation</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="mainContent">
+            <h2>Your New Model Pricing</h2>
+
+            <div class="result-card">
+                <h3>Annual Pricing Breakdown</h3>
+                <div class="result-row">
+                    <span class="result-label">Content Creation (<span id="displayCredits">60</span> credits)</span>
+                    <span class="result-value" id="contentAnnual">$78,000</span>
+                </div>
+                <div class="result-row" id="managedRow" style="display: none;">
+                    <span class="result-label">Managed Services (12 months)</span>
+                    <span class="result-value" id="managedAnnual">$0</span>
+                </div>
+                <div class="result-row total">
+                    <span class="result-label" style="font-size: 1.15rem;">Total Annual Cost</span>
+                    <span class="result-value" style="font-size: 1.4rem;" id="totalAnnual">$78,000</span>
+                </div>
+                <small style="display: block; margin-top: 8px;">Quarterly: <span id="totalQuarterly">$19,500</span></small>
+            </div>
+
+            <div class="calculation-box" id="calcBox">
+                <h3 id="calcTitle">💰 Additional Payment Required</h3>
+                
+                <div class="calculation-grid">
+                    <div class="calc-item">
+                        <div class="calc-label">Tokens Available</div>
+                        <div class="calc-value" id="tokensDisplay">$96,000</div>
+                    </div>
+                    <div class="calc-operator">−</div>
+                    <div class="calc-item">
+                        <div class="calc-label">Annual Cost</div>
+                        <div class="calc-value" id="costDisplay">$78,000</div>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="label" id="resultLabel">You need to pay</div>
+                    <div class="big-number" id="netAmount">$0</div>
+                    <div class="note" id="resultNote">Tokens cover all costs</div>
+                </div>
+            </div>
+
+            <div class="benefit-box" id="platformBenefit" style="display: none;">
+                <h3>🎁 Additional Benefit: Free Platform Access</h3>
+                <p>Your <strong><span id="brandCount">0</span> brand profiles</strong> receive <strong>12 months FREE</strong> platform access</p>
+                <div class="value" id="platformValue">$0</div>
+                <div class="note">Standard pricing is $24K/brand/year (kicks in at renewal)</div>
+            </div>
+
+            <div class="summary-box">
+                <h4>📋 Summary</h4>
+                <ul id="summaryList">
+                    <li><strong>$96,000</strong> in platform tokens to use on any services</li>
+                    <li><strong>$78,000</strong> total annual cost under new model</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="contact-sales" id="contactSales" style="display: none;">
+            <h3>💬 Custom Enterprise Pricing</h3>
+            <p>For capacity over 1,000 credits or custom requirements, please contact our sales team.</p>
+            <p><a href="mailto:sales@creativelysquared.com">sales@creativelysquared.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        const pricing = {
+            0: 0,
+            30: 12000,
+            60: 19500,
+            120: 37500,
+            250: 72000,
+            500: 144000,
+            1000: 285000
+        };
+
+        function fmt(n) {
+            return '$' + n.toLocaleString('en-US');
+        }
+
+        function calculate() {
+            const creditsSelect = document.getElementById('credits');
+            const creditsValue = creditsSelect.value;
+            
+            // Handle "Contact Sales" option
+            if (creditsValue === 'contact') {
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('contactSales').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('contactSales').style.display = 'none';
+            }
+
+            const tokens = parseFloat(document.getElementById('tokens').value) || 0;
+            const credits = parseFloat(creditsValue);
+            const brands = parseFloat(document.getElementById('brands').value) || 0;
+            const managed = document.getElementById('managed').checked;
+            const adSpend = parseFloat(document.getElementById('adSpend').value) || 0;
+            const percent = parseFloat(document.getElementById('percent').value) || 15;
+
+            const contentQ = pricing[credits];
+            const contentA = contentQ * 4;
+            const managedQ = managed ? Math.max(5000, adSpend * (percent / 100)) * 3 : 0;
+            const managedA = managedQ * 4;
+            const totalA = contentA + managedA;
+            const totalQ = contentQ + managedQ;
+            const netCost = totalA - tokens;
+            const monthsCovered = tokens >= totalA ? 12 : Math.round((tokens / totalQ) * 3);
+            const platformVal = brands * 24000;
+
+            // Update displays
+            document.getElementById('displayCredits').textContent = credits;
+            document.getElementById('contentAnnual').textContent = fmt(contentA);
+            document.getElementById('totalAnnual').textContent = fmt(totalA);
+            document.getElementById('totalQuarterly').textContent = fmt(totalQ);
+            document.getElementById('tokensDisplay').textContent = fmt(tokens);
+            document.getElementById('costDisplay').textContent = fmt(totalA);
+
+            // Managed services row
+            if (managed) {
+                document.getElementById('managedRow').style.display = 'flex';
+                document.getElementById('managedAnnual').textContent = fmt(managedA);
+            } else {
+                document.getElementById('managedRow').style.display = 'none';
+            }
+
+            // Calculation box
+            const calcBox = document.getElementById('calcBox');
+            const netAmountEl = document.getElementById('netAmount');
+            
+            if (netCost > 0) {
+                calcBox.className = 'calculation-box needs-payment';
+                document.getElementById('calcTitle').textContent = '💰 Additional Payment Required';
+                document.getElementById('resultLabel').textContent = 'You need to pay';
+                netAmountEl.textContent = '+' + fmt(netCost);
+                netAmountEl.className = 'big-number positive';
+                document.getElementById('resultNote').textContent = `Tokens cover ~${monthsCovered} months, then billing begins`;
+            } else if (netCost < 0) {
+                calcBox.className = 'calculation-box covered';
+                document.getElementById('calcTitle').textContent = '✅ Fully Covered by Tokens';
+                document.getElementById('resultLabel').textContent = 'Tokens remaining after 12 months';
+                netAmountEl.textContent = fmt(Math.abs(netCost));
+                netAmountEl.className = 'big-number negative';
+                document.getElementById('resultNote').textContent = 'Forfeit at renewal if not used';
+            } else {
+                calcBox.className = 'calculation-box covered';
+                document.getElementById('calcTitle').textContent = '✅ Fully Covered by Tokens';
+                document.getElementById('resultLabel').textContent = 'Perfect match!';
+                netAmountEl.textContent = fmt(0);
+                netAmountEl.className = 'big-number negative';
+                document.getElementById('resultNote').textContent = 'Tokens exactly cover annual cost';
+            }
+
+            // Platform benefit
+            if (brands > 0) {
+                document.getElementById('platformBenefit').style.display = 'block';
+                document.getElementById('brandCount').textContent = brands;
+                document.getElementById('platformValue').textContent = 'Value: ' + fmt(platformVal);
+            } else {
+                document.getElementById('platformBenefit').style.display = 'none';
+            }
+
+            // Summary
+            let summary = `
+                <li><strong>${fmt(tokens)}</strong> in platform tokens to use on any services</li>
+                <li><strong>${fmt(totalA)}</strong> total annual cost under new model</li>
+            `;
+            
+            if (netCost > 0) {
+                summary += `<li><strong>${fmt(netCost)}</strong> additional payment needed (tokens cover ${monthsCovered} months)</li>`;
+            } else if (netCost < 0) {
+                summary += `<li><strong>${fmt(Math.abs(netCost))}</strong> in unused tokens (forfeit at renewal)</li>`;
+            }
+            
+            if (brands > 0) {
+                summary += `<li><strong>${fmt(platformVal)}</strong> in free platform access (12 months)</li>`;
+            }
+            
+            summary += `<li>Upgrade services anytime, downgrade quarterly</li>`;
+            
+            document.getElementById('summaryList').innerHTML = summary;
+        }
+
+        // Event listeners
+        document.getElementById('managed').addEventListener('change', function() {
+            const show = this.checked;
+            document.getElementById('adSpendGroup').style.display = show ? 'block' : 'none';
+            document.getElementById('percentGroup').style.display = show ? 'block' : 'none';
+            calculate();
+        });
+
+        document.getElementById('tokens').addEventListener('input', calculate);
+        document.getElementById('credits').addEventListener('change', calculate);
+        document.getElementById('brands').addEventListener('input', calculate);
+        document.getElementById('adSpend').addEventListener('input', calculate);
+        document.getElementById('percent').addEventListener('input', calculate);
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
