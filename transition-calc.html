@@ -1,50 +1,432 @@
-import React, { useState } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Transition Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const CustomerTransitionCalculator = () => {
-  const [expiryDate, setExpiryDate] = useState('2026-05-01');
-  const [committed, setCommitted] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState(24000);
-  const [newCredits, setNewCredits] = useState(60);
-  const [brands, setBrands] = useState(1);
-  const [managedService, setManagedService] = useState(false);
-  const [monthlyAdSpend, setMonthlyAdSpend] = useState(50000);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ECFBFA;
+            padding: 30px 15px;
+            color: #2c3e50;
+            min-height: 100vh;
+        }
 
-  const pricing = {
-    0: 0,
-    30: 12000,
-    60: 19500,
-    120: 37500,
-    250: 72000,
-    500: 144000,
-    1000: 285000
-  };
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
 
-  const startDate = new Date('2025-10-01');
-  const expiry = new Date(expiryDate);
-  
-  const getMonthsDifference = (date1, date2) => {
-    const years = date2.getFullYear() - date1.getFullYear();
-    const months = date2.getMonth() - date1.getMonth();
-    return years * 12 + months;
-  };
+        h1 {
+            text-align: center;
+            color: #00C5CB;
+            font-size: 2.2rem;
+            margin-bottom: 35px;
+        }
 
-  const monthsToExpiry = getMonthsDifference(startDate, expiry);
-  const totalFreeMonths = committed ? monthsToExpiry + 12 : monthsToExpiry;
-  
-  const finalExpiryDate = new Date(expiry);
-  if (committed) {
-    finalExpiryDate.setMonth(finalExpiryDate.getMonth() + 12);
-  }
+        h2 {
+            color: #00C5CB;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #C5F1F1;
+        }
 
-  const quartersRemaining = Math.ceil(monthsToExpiry / 3);
-  const creditsAvailable = currentPlan * quartersRemaining;
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 197, 203, 0.1);
+            margin-bottom: 25px;
+        }
 
-  const fmt = (n) => '$' + n.toLocaleString('en-US');
+        .input-group {
+            margin-bottom: 20px;
+        }
 
-  // [Rest of the component JSX - the full return statement]
-  return (
-    // ... full JSX from the artifact
-  );
-};
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
 
-export default CustomerTransitionCalculator;
+        input[type="number"], input[type="date"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #C5F1F1;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        input[type="number"]:focus, input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: #00C5CB;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #00C5CB;
+            cursor: pointer;
+        }
+
+        .checkbox-container {
+            background: #C5F1F1;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #00C5CB;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        small {
+            color: #666;
+            font-style: italic;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .platform-card {
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .platform-card.committed {
+            background: #00C5CB;
+            color: white;
+        }
+
+        .platform-card.baseline {
+            background: #C5F1F1;
+            color: #2c3e50;
+            border: 3px solid #00C5CB;
+        }
+
+        .big-number {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .platform-value-box {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .info-banner {
+            background: #E8F8F8;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 2px solid #00C5CB;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .pricing-section {
+            background: #C5F1F1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .price-value {
+            font-weight: 700;
+            color: #00C5CB;
+            font-size: 1.2rem;
+        }
+
+        .strikethrough {
+            text-decoration: line-through;
+        }
+
+        .free-badge {
+            background: #00C5CB;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .quarter-box {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .quarter-covered {
+            background: #E8F8F8;
+            border: 2px solid #00C5CB;
+        }
+
+        .quarter-topup {
+            background: #FFF9E6;
+            border: 2px solid #FFC107;
+        }
+
+        .quarter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .summary-box {
+            background: #C5F1F1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 197, 203, 0.3);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .total-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .total-topup {
+            background: #FFF9E6;
+            border: 3px solid #FFC107;
+        }
+
+        .total-covered {
+            background: #E8F8F8;
+            border: 3px solid #00C5CB;
+        }
+
+        .platform-value-final {
+            background: #00C5CB;
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .big-number {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Transition Calculator</h1>
+
+        <div class="card">
+            <h2>Customer Details</h2>
+
+            <div class="input-group">
+                <label for="expiryDate">Contract Expiry Date</label>
+                <input type="date" id="expiryDate" value="2026-05-01">
+            </div>
+
+            <div class="input-group">
+                <label for="brands">Number of Brand Profiles</label>
+                <input type="number" id="brands" value="1" min="1">
+                <small>Platform fee is $24K per brand annually</small>
+            </div>
+
+            <div class="input-group">
+                <label for="currentPlan">Current Plan (Quarterly Equivalent)</label>
+                <select id="currentPlan">
+                    <option value="15000">Launch (30 credits) - $15K/quarter</option>
+                    <option value="24000" selected>Growth (60 credits) - $24K/quarter</option>
+                    <option value="75000">Scale (120 credits) - $75K/quarter</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="newCredits">New Content Credit Capacity (Per Quarter)</label>
+                <select id="newCredits">
+                    <option value="0">0 credits - $0/quarter</option>
+                    <option value="30">30 credits - $12K/quarter</option>
+                    <option value="60" selected>60 credits - $19.5K/quarter</option>
+                    <option value="120">120 credits - $37.5K/quarter</option>
+                    <option value="250">250 credits - $72K/quarter</option>
+                    <option value="500">500 credits - $144K/quarter</option>
+                    <option value="1000">1,000 credits - $285K/quarter</option>
+                </select>
+                <small>Can adjust capacity every quarter</small>
+            </div>
+
+            <div class="checkbox-container">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="committed">
+                    <span>Committed to another 12 months by Dec 31, 2025?</span>
+                </label>
+            </div>
+
+            <div class="checkbox-container">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="managedService">
+                    <span>Add Managed Service</span>
+                </label>
+            </div>
+
+            <div class="input-group hidden" id="adSpendGroup">
+                <label for="adSpend">Monthly Ad Spend</label>
+                <input type="number" id="adSpend" value="50000">
+                <small>10% of media spend, $5K minimum per month</small>
+            </div>
+        </div>
+
+        <div id="platformCard" class="platform-card baseline">
+            <h3 id="platformTitle" style="font-size: 1.2rem; margin-bottom: 15px;">📅 Baseline Platform Access</h3>
+            <div class="big-number" id="freeMonths">7</div>
+            <div style="font-size: 1.3rem; margin-bottom: 10px;">months of FREE platform access</div>
+            <div style="font-size: 0.95rem; margin-top: 15px;" id="dateRange">From October 2025 through May 2026</div>
+            <div id="bonusBadge" class="hidden" style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 0.9rem;">
+                🎁 Bonus: <span id="bonusText"></span>
+            </div>
+            <div class="platform-value-box">
+                <div style="font-size: 0.9rem; margin-bottom: 10px;" id="platformFeeLabel">Platform Fee Value (1 brand)</div>
+                <div style="font-size: 2.5rem; font-weight: bold; margin: 10px 0;" id="platformValue">$14,000</div>
+                <div style="font-size: 0.85rem;" id="platformCalc">$24K/brand/year × 1 brand × 7 months</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Account Credits</h2>
+            <div style="text-align: center; padding: 20px; background: #C5F1F1; border-radius: 8px; margin-bottom: 20px;">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Credits Available to Use</div>
+                <div style="font-size: 3rem; font-weight: bold; color: #00C5CB;" id="creditsAmount">$72,000</div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 8px;" id="creditsUntil">From now until May 1, 2026</div>
+            </div>
+            <div style="background: #E8F8F8; padding: 15px; border-radius: 6px;">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">📊 Calculation: Current plan value × remaining time</div>
+                <div style="font-size: 0.85rem; color: #666;" id="creditsCalc">$96K annual plan × 3 quarters = $72K</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>New Model Pricing</h2>
+
+            <div class="info-banner" id="quarterInfo">📊 Showing quarterly breakdown from now until May 2026 (3 quarters)</div>
+
+            <div class="pricing-section">
+                <div class="price-row">
+                    <span style="font-weight: 600;">Platform Fee (Annual)</span>
+                    <span class="price-value strikethrough" id="annualPlatformFee">$24,000</span>
+                </div>
+                <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px;" id="platformFeeCalc">$24K/brand</div>
+                <div class="free-badge" id="freeBadge">FREE for 7 months</div>
+            </div>
+
+            <div class="pricing-section">
+                <div class="price-row">
+                    <span style="font-weight: 600;">Content Creation (<span id="creditsDisplay">60</span> credits)</span>
+                    <span class="price-value" id="contentPrice">$19,500/quarter</span>
+                </div>
+
+                <div id="managedServiceSection" class="hidden">
+                    <div style="border-top: 1px solid rgba(0, 197, 203, 0.3); margin-top: 15px; padding-top: 15px;">
+                        <div class="price-row" style="margin-bottom: 5px;">
+                            <span style="font-weight: 600;">Managed Service</span>
+                            <span class="price-value" id="managedPrice">$15,000/quarter</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666; margin-top: 5px;" id="managedCalc">
+                            10% of $50,000/month ad spend = $5,000/month
+                        </div>
+                    </div>
+                    <div style="border-top: 2px solid #00C5CB; margin-top: 15px; padding-top: 15px;">
+                        <div class="price-row">
+                            <span style="font-weight: 600; font-size: 1.1rem;">Total Per Quarter</span>
+                            <span style="font-weight: 700; color: #00C5CB; font-size: 1.3rem;" id="totalPerQuarter">$34,500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="quarterBreakdown" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.5rem; text-align: center; padding-bottom: 15px;">📊 Transition Summary</h2>
+
+            <div class="summary-box">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px; text-align: center;">
+                    <strong>Current Situation</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Annual payment (current plan)</span>
+                    <span style="font-weight: 700; color: #00C5CB;" id="summaryAnnual">$96,000</span>
+                </div>
+                <div class="summary-row">
+                    <span>Remaining term</span>
+                    <span style="font-weight: 700; color: #00C5CB;" id="summaryTerm">7 months (3 quarters)</span>
+                </div>
+                <div class="summary-row">
+                    <span>Credits available</span>
+                    <span style="font-weight: 700; color: #00C5CB;" id="summaryCredits">$72,000</span>
+                </div>
+            </div>
+
+            <div style="background: #E8F8F8; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 15px; text-align: center;">
+                    <strong>New Model Costs</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Content Creation (<span id="summaryCreditsNum">60</span> credits)</span>
+                    <span style="font-weight: 700; color: #00C5CB;" id="summaryContent">$58,500</span>
+                </div>
+                <div class="summary-row hidden" id="summaryManagedRow">
+                    <span>Managed Service (<span id="summaryManagedQuarters">3</span> quarters)</span>
+                    <span style="font-weight: 700; color: #00C5CB;" id="summaryManaged">$45,000</span>
+                </div>
+                <div class="summary-row" style="border-top: 2px solid #00C5CB; margin-top: 8px; padding-top: 12px;">
+                    <span style="font-weight: 600;">Total Cost</span>
+                    <span style="font-weight: 700; color: #00C5CB; font-size: 1.2rem;" id="summaryTotal">$58,500</span>
+                </div>
+                <div class="summary-row" style="font-size: 0.9rem; color: #666;">
