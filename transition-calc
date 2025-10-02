@@ -1,0 +1,50 @@
+import React, { useState } from 'react';
+
+const CustomerTransitionCalculator = () => {
+  const [expiryDate, setExpiryDate] = useState('2026-05-01');
+  const [committed, setCommitted] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState(24000);
+  const [newCredits, setNewCredits] = useState(60);
+  const [brands, setBrands] = useState(1);
+  const [managedService, setManagedService] = useState(false);
+  const [monthlyAdSpend, setMonthlyAdSpend] = useState(50000);
+
+  const pricing = {
+    0: 0,
+    30: 12000,
+    60: 19500,
+    120: 37500,
+    250: 72000,
+    500: 144000,
+    1000: 285000
+  };
+
+  const startDate = new Date('2025-10-01');
+  const expiry = new Date(expiryDate);
+  
+  const getMonthsDifference = (date1, date2) => {
+    const years = date2.getFullYear() - date1.getFullYear();
+    const months = date2.getMonth() - date1.getMonth();
+    return years * 12 + months;
+  };
+
+  const monthsToExpiry = getMonthsDifference(startDate, expiry);
+  const totalFreeMonths = committed ? monthsToExpiry + 12 : monthsToExpiry;
+  
+  const finalExpiryDate = new Date(expiry);
+  if (committed) {
+    finalExpiryDate.setMonth(finalExpiryDate.getMonth() + 12);
+  }
+
+  const quartersRemaining = Math.ceil(monthsToExpiry / 3);
+  const creditsAvailable = currentPlan * quartersRemaining;
+
+  const fmt = (n) => '$' + n.toLocaleString('en-US');
+
+  // [Rest of the component JSX - the full return statement]
+  return (
+    // ... full JSX from the artifact
+  );
+};
+
+export default CustomerTransitionCalculator;
